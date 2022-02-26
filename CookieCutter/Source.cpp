@@ -7,6 +7,8 @@
 #define UNICODE
 #endif 
 
+#define OK_MESSAGE 1
+
 #include <windows.h>
 
 #include "ColorPicker.h"
@@ -36,6 +38,7 @@ void timerFunction() {
 }
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+void createInitialScreen(HWND hwnd);
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow){
 	// Register the window class.
@@ -148,35 +151,43 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	return 0;
 }
 
-LPCWSTR instructions = TEXT("HOW TO PLAY\n\n"
-	"1. Get a pen with a colored tip. Make sure you're in a well lit room.\n\n"
-	"2. In the next screen keep moving the trackbars until the color of your pen appears as white.\n"
-	"Make sure that the max is always higher than the min!\n\n"
-	"3. Once you're done choosing the color, close the trackbars window and start playing.\n\n"
-	"Have fun and good luck!");
-
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
 	case WM_DESTROY:
 		PostQuitMessage(0);
-		return 0;
-
+		break;
 	case WM_CREATE:
-	{
-		HWND hText = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("STATIC"), instructions,
-			WS_CHILD | WS_VISIBLE, 
-			30, 30, 650, 200, 
-			hwnd, HMENU(NULL), GetModuleHandle(NULL), NULL);
-
-		CreateWindowW(L"Button", L"OK",
-			WS_VISIBLE | WS_CHILD,
-			300, 250, 80, 30,
-			hwnd, HMENU(NULL), GetModuleHandleW(NULL), NULL);
-	}
-	return 0;
-
+		createInitialScreen(hwnd);
+		break;
+	case WM_COMMAND:
+		switch (wParam) {
+		case OK_MESSAGE:
+			PostQuitMessage(0);
+			DestroyWindow(hwnd);
+			break;
+		}
+		break;
 	}
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+void createInitialScreen(HWND hwnd) {
+	LPCWSTR instructions = TEXT("HOW TO PLAY\n\n"
+		"1. Get a pen with a colored tip. Make sure you're in a well lit room.\n\n"
+		"2. In the next screen keep moving the trackbars until the color of your pen appears as white.\n"
+		"Make sure that the max is always higher than the min!\n\n"
+		"3. Once you're done choosing the color, close the trackbars window and start playing.\n\n"
+		"Have fun and good luck!");
+
+	HWND hText = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("STATIC"), instructions,
+		WS_CHILD | WS_VISIBLE,
+		30, 30, 650, 200,
+		hwnd, HMENU(NULL), NULL, NULL);
+
+	CreateWindowW(L"Button", L"OK",
+		WS_VISIBLE | WS_CHILD,
+		300, 250, 80, 30,
+		hwnd, (HMENU)OK_MESSAGE, NULL, NULL);
 }
